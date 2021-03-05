@@ -25,6 +25,7 @@ public class Server {
             while (true){
                 socket = serverSocket.accept();
                 System.out.println("Client connected " + socket.getRemoteSocketAddress());
+                new ClientHandler(this, socket);
             }
         } catch (IOException e) {
             e.printStackTrace();

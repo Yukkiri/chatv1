@@ -125,7 +125,7 @@ public class Controller implements Initializable {
                                 throw new RuntimeException("Disconnected by server");
                             }
                         }
-                        chat.appendText("Server: " + in + "\n");
+                        chat.appendText(in + "\n");
 
                     }
                 } catch (IOException e) {
