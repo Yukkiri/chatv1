@@ -1,5 +1,3 @@
-<?import javafx.scene.layout.GridPane?>
-
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -7,6 +5,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
 <VBox fx:controller="client.Controller"
       xmlns:fx="http://javafx.com/fxml" alignment="center">
 
@@ -17,13 +16,17 @@
     <HBox fx:id="authPanel">
         <TextField fx:id="log" HBox.hgrow="ALWAYS" promptText="Login"/>
         <PasswordField fx:id="pass" promptText="Password" HBox.hgrow="ALWAYS" onAction="#tryAuth"/>
-        <Button fx:id="sendData" GridPane.columnIndex="1" GridPane.rowIndex="1" text="Enter" prefWidth="100" onAction="#tryAuth"/>
+        <Button fx:id="sendData" text="Enter" prefWidth="100" onAction="#tryAuth"/>
+        <Button fx:id="regButton" text="Registration" prefWidth="100" onAction="#wantToReg"/>
     </HBox>
 
-    <TextArea fx:id="chat" GridPane.columnIndex="0" GridPane.rowIndex="0" prefWidth="670" prefHeight="450" editable="false" focusTraversable="false" />
+    <HBox VBox.vgrow="ALWAYS">
+        <TextArea fx:id="chat" HBox.hgrow="ALWAYS" editable="false" focusTraversable="false" wrapText="true"/>
+        <ListView fx:id="clientList" minWidth="120" visible="false" managed="false" onMouseClicked="#clientListPressed"/>
+    </HBox>
 
     <HBox fx:id="messagePanel" visible="false" managed="false">
-    <TextArea fx:id="message" HBox.hgrow="ALWAYS" promptText="Input your message" onKeyReleased="#sendMessageTA"/>
-    <Button fx:id="send" HBox.hgrow="ALWAYS" text="Enter" prefHeight="100" prefWidth="100" onAction="#sendMessage"/>
+    <TextArea fx:id="message" HBox.hgrow="ALWAYS" promptText="Input your message" onKeyReleased="#sendMessageTA" wrapText="true"/>
+    <Button fx:id="send" text="Enter" prefWidth="150" prefHeight="150" onAction="#sendMessage"/>
     </HBox>
 </VBox>

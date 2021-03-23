@@ -1,16 +1,23 @@
 package client;
 
+import commands.Commands;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -19,8 +26,13 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Spliterator;
 
 public class Controller implements Initializable {
+    @FXML
+    public ListView<String> clientList;
+    @FXML
+    public Button regButton;
     @FXML
     private HBox authPanel;
     @FXML
@@ -46,6 +58,14 @@ public class Controller implements Initializable {
     private boolean isAuth;
 
     private String nick;
+
+    private Stage stage;
+
+    private Stage regStage;
+
+    private RegController regController;
+
+    private String chatTitle = "ICQ2021";
 
     @FXML
     public void sendMessage() {
@@ -73,7 +93,7 @@ public class Controller implements Initializable {
             connect();
         }
 
-        String messageToServer = String.format("/auth %s %s", log.getText().trim(), pass.getText().trim());
+        String messageToServer = String.format("%s %s %s", Commands.AUTH, log.getText().trim(), pass.getText().trim());
         try {
             out.writeUTF(messageToServer);
             pass.clear();
@@ -85,6 +105,19 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //Platform.runLater(() ->{message.requestFocus();});
+
+        Platform.runLater(() ->{
+            stage = (Stage) chat.getScene().getWindow();
+            stage.setOnCloseRequest(event -> {
+                if(socket != null && !socket.isClosed()){
+                    try {
+                        out.writeUTF(Commands.END);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        });
 
         setIsAuth(false);
 
@@ -100,16 +133,23 @@ public class Controller implements Initializable {
 
                 try {
                     //authentication
-                    while (true){
+                    while (true) {
                         String in = input.readUTF();
-                        if(in.startsWith("/")){
-                            if(in.equalsIgnoreCase("/end")){
+                        if (in.startsWith("/")) {
+                            if (in.equalsIgnoreCase(Commands.END)) {
                                 throw new RuntimeException("Disconnected by server");
                             }
-                            if(in.startsWith("/authOk")){
+                            if (in.startsWith(Commands.AUTH_OK)) {
                                 nick = in.split("\\s")[1];
                                 setIsAuth(true);
+                                chat.clear();
                                 break;
+                            }
+                            if (in.equals(Commands.REGISTRATION_OK)){
+                                regController.regResult(true);
+                            }
+                            if (in.equals(Commands.REGISTRATION_FAILED)){
+                                regController.regResult(false);
                             }
                         } else {
                             chat.appendText(in + "\n");
@@ -118,16 +158,28 @@ public class Controller implements Initializable {
                     }
 
                     //work
-                    while (true){
+                    while (true) {
                         String in = input.readUTF();
-                        if(in.startsWith("/")) {
-                            if (in.equalsIgnoreCase("/end")) {
+
+                        if (in.startsWith("/")){
+                            if (in.equalsIgnoreCase(Commands.END)) {
                                 throw new RuntimeException("Disconnected by server");
                             }
+                            if (in.startsWith(Commands.CLIENT_LIST)){
+                                String [] tokens = in.split("\\s");
+                                Platform.runLater(()->{
+                                    clientList.getItems().clear();
+                                    for (int i = 1; i < tokens.length; i++) {
+                                        clientList.getItems().add(tokens[i]);
+                                    }
+                                });
+                            }
+                        } else {
+                            chat.appendText(in + "\n");
                         }
-                        chat.appendText(in + "\n");
-
                     }
+                } catch (RuntimeException e){
+                    System.out.println(e.getMessage());
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -151,12 +203,72 @@ public class Controller implements Initializable {
         messagePanel.setManaged(isAuth);
         authPanel.setVisible(!isAuth);
         authPanel.setManaged(!isAuth);
+        clientList.setVisible(isAuth);
+        clientList.setManaged(isAuth);
 
         if(!isAuth){
             nick = "";
         }
 
+        setTitle(nick);
         chat.clear();
         message.clear();
+    }
+
+    private void setTitle(String title){
+        Platform.runLater(() ->{
+            if (title.equals("")){
+                stage.setTitle(chatTitle);
+            } else {
+                stage.setTitle(String.format("%s [%s]", chatTitle, title));
+            }
+        });
+    }
+
+    @FXML
+    public void clientListPressed(MouseEvent mouseEvent) {
+        String text = message.getText();
+        String user = clientList.getSelectionModel().getSelectedItems().toString();
+        user = user.substring(1, user.length()-1);
+        String messageToUser = String.format("%s %s %s", Commands.WHISPER, user, text);
+        message.clear();
+        message.setText(messageToUser);
+    }
+
+    public void wantToReg(ActionEvent actionEvent) {
+        if(regStage == null){
+            createRegWindow();
+        }
+        regStage.show();
+    }
+
+    private void createRegWindow(){
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/reg.fxml"));
+            Parent root = fxmlLoader.load();
+
+            regController = fxmlLoader.getController();
+            regController.setController(this);
+
+            regStage = new Stage();
+            regStage.setTitle(chatTitle + " - регистрация");
+            regStage.setScene(new Scene(root, 400, 300));
+
+            regStage.initModality(Modality.APPLICATION_MODAL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void tryToReg(String login, String password, String nickname){
+        String message = String.format("%s %s %s %s", Commands.REGISTRATION, login, password, nickname);
+        if (socket == null || socket.isClosed()){
+            connect();
+        }
+        try {
+            out.writeUTF(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

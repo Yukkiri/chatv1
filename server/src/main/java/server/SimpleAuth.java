@@ -40,4 +40,15 @@ public class SimpleAuth implements Authentication{
         }
         return null;
     }
+
+    @Override
+    public boolean registration(String log, String pass, String nick) {
+        for (DataUser user : users) {
+            if (user.log.equals(log) || user.nick.equals(nick)){
+                return false;
+            }
+        }
+        users.add(new DataUser(log, pass, nick));
+        return true;
+    }
 }

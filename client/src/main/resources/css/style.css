@@ -3,3 +3,14 @@
     -fx-background-size: 100% 100%;
     -fx-font-family: monospace;
 }
+
+.text-area {
+    -fx-background-color: white;
+    -fx-opacity: 90%;
+    -fx-border-color: white;
+}
+
+.list-view {
+    -fx-background-color: white;
+    -fx-opacity: 70%;
+}
