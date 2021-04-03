@@ -45,8 +45,8 @@ public class ClientHandler {
                                 if (newNick != null) {
                                     if (!server.isLogAuth(log)) {
                                         nick = newNick;
-                                        server.subscribe(this);
                                         sendMessage(String.format("%s %s", Commands.AUTH_OK, nick));
+                                        server.subscribe(this);
                                         break;
                                     } else {
                                         sendMessage("Учетная запись занята!");

@@ -21,12 +21,12 @@
     </HBox>
 
     <HBox VBox.vgrow="ALWAYS">
-        <TextArea fx:id="chat" HBox.hgrow="ALWAYS" editable="false" focusTraversable="false" wrapText="true"/>
+        <TextArea fx:id="chat" HBox.hgrow="ALWAYS" editable="false" focusTraversable="false" wrapText="true" />
         <ListView fx:id="clientList" minWidth="120" visible="false" managed="false" onMouseClicked="#clientListPressed"/>
     </HBox>
 
-    <HBox fx:id="messagePanel" visible="false" managed="false">
+    <HBox fx:id="messagePanel" visible="false" managed="false" alignment="CENTER">
     <TextArea fx:id="message" HBox.hgrow="ALWAYS" promptText="Input your message" onKeyReleased="#sendMessageTA" wrapText="true"/>
-    <Button fx:id="send" text="Enter" prefWidth="150" prefHeight="150" onAction="#sendMessage"/>
+    <Button fx:id="send" text="Enter" prefWidth="100" prefHeight="100" onAction="#sendMessage"/>
     </HBox>
 </VBox>

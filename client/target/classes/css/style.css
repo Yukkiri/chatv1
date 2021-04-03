@@ -5,12 +5,10 @@
 }
 
 .text-area {
-    -fx-background-color: white;
-    -fx-opacity: 90%;
     -fx-border-color: white;
+    -fx-opacity: 70%;
 }
 
 .list-view {
-    -fx-background-color: white;
-    -fx-opacity: 70%;
+    -fx-opacity: 90%;
 }
