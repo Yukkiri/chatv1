@@ -24,7 +24,7 @@ public class Server {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Server OK");
 
-            while (true){
+            while (true) {
                 socket = serverSocket.accept();
                 System.out.println("Client connected " + socket.getRemoteSocketAddress());
                 new ClientHandler(this, socket);
@@ -40,33 +40,33 @@ public class Server {
         }
     }
 
-    public void broadcastMessage(ClientHandler author, String message){
+    public void broadcastMessage(ClientHandler author, String message) {
         message = String.format("[%s] : %s ", author.getNick(), message);
         for (ClientHandler client : clients) {
             client.sendMessage(message);
         }
     }
 
-    public void subscribe(ClientHandler clientHandler){
+    public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
         broadcastSendingClientList();
     }
 
-    public void unsubscribe(ClientHandler clientHandler){
+    public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
         broadcastSendingClientList();
     }
 
-    public Authentication getAuth(){
+    public Authentication getAuth() {
         return auth;
     }
 
-    public void sendPrivate(ClientHandler author, String receiver, String message){
+    public void sendPrivate(ClientHandler author, String receiver, String message) {
         message = String.format("[%s] -> [%s] : %s", author.getNick(), receiver, message);
         for (ClientHandler client : clients) {
-            if(client.getNick().equals(receiver)) {
+            if (client.getNick().equals(receiver)) {
                 client.sendMessage(message);
-                if(!client.equals(author)){
+                if (!client.equals(author)) {
                     author.sendMessage(message);
                 }
                 return;
@@ -75,16 +75,16 @@ public class Server {
         author.sendMessage("[Server]: Пользователя " + receiver + " не существует!");
     }
 
-    public boolean isLogAuth(String log){
+    public boolean isLogAuth(String log) {
         for (ClientHandler client : clients) {
-            if(client.getLog().equals(log)){
+            if (client.getLog().equals(log)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void broadcastSendingClientList(){
+    public void broadcastSendingClientList() {
         StringBuilder clientList = new StringBuilder(Commands.CLIENT_LIST);
         for (ClientHandler client : clients) {
             clientList.append(" ").append(client.getNick());

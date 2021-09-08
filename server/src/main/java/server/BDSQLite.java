@@ -10,7 +10,6 @@ public class BDSQLite {
     public static ResultSet resultSet;
 
     public static void setConnection() throws ClassNotFoundException, SQLException {
-        connection = null;
         Class.forName("org.sqlite.JDBC");
         connection = DriverManager.getConnection("jdbc:sqlite:CHAT.users");
     }
@@ -23,22 +22,24 @@ public class BDSQLite {
     }
 
     public static boolean newUser(String log, String pass, String nick) throws SQLException {
-        resultSet = statement.executeQuery("SELECT * FROM 'users' WHERE 'login' = " + log + "OR 'nickname' = " + nick);
-        if (resultSet.wasNull()){
-            statement.execute("INSERT INTO 'users' ('login', 'password', 'nickname') VALUES ('" + log + "', '" + pass + "', '" + nick + "')");
-            return true;
+        resultSet = statement.executeQuery("SELECT DISTINCT * FROM 'users'");
+        while (resultSet.next()) {
+            if (resultSet.getString("login").equals(log) || resultSet.getString("nickname").equals(nick)) {
+                return false;
+            }
         }
-        return false;
+        statement.execute("INSERT INTO 'users' ('login', 'password', 'nickname') VALUES ('" + log + "', '" + pass + "', '" + nick + "')");
+        return true;
     }
 
     public static String loginUser(String log, String pass) throws SQLException {
         resultSet = statement.executeQuery("SELECT * FROM 'users'");
 
-        while (resultSet.next()){
+        while (resultSet.next()) {
             String login = resultSet.getString("login");
             String password = resultSet.getString("password");
             String nickname = resultSet.getString("nickname");
-            if (log.equals(login) && pass.equals(password)){
+            if (log.equals(login) && pass.equals(password)) {
                 return nickname;
             }
         }

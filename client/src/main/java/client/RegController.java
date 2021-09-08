@@ -37,7 +37,7 @@ public class RegController {
         controller.tryToReg(log, pass, nick);
     }
 
-    public void regResult(boolean flag){
+    public void regResult(boolean flag) {
         info.appendText(flag ? "Регистрация прошла успешно\n" : "Логин или никнейм уже занят\n");
     }
 }

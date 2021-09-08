@@ -4,7 +4,6 @@ package client;
 import commands.Commands;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -17,17 +16,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
-import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.Spliterator;
 
 public class Controller implements Initializable {
     @FXML
@@ -80,17 +75,17 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    public void sendMessageTA(KeyEvent keyEvent){
-        if(keyEvent.isShiftDown()&&keyEvent.getCode().equals(KeyCode.ENTER)){
+    public void sendMessageTA(KeyEvent keyEvent) {
+        if (keyEvent.isShiftDown() && keyEvent.getCode().equals(KeyCode.ENTER)) {
             sendMessage();
-        } else if(keyEvent.getCode().equals(KeyCode.ENTER)){
+        } else if (keyEvent.getCode().equals(KeyCode.ENTER)) {
             message.appendText("");
         }
     }
 
     @FXML
     public void tryAuth(ActionEvent actionEvent) {
-        if (socket == null || socket.isClosed()){
+        if (socket == null || socket.isClosed()) {
             connect();
         }
 
@@ -105,12 +100,10 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //Platform.runLater(() ->{message.requestFocus();});
-
-        Platform.runLater(() ->{
+        Platform.runLater(() -> {
             stage = (Stage) chat.getScene().getWindow();
             stage.setOnCloseRequest(event -> {
-                if(socket != null && !socket.isClosed()){
+                if (socket != null && !socket.isClosed()) {
                     try {
                         out.writeUTF(Commands.END);
                     } catch (IOException e) {
@@ -124,13 +117,13 @@ public class Controller implements Initializable {
 
     }
 
-    private void connect(){
+    private void connect() {
         try {
             socket = new Socket(IP, PORT);
             input = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-            new Thread(()->{
+            new Thread(() -> {
 
                 try {
                     //authentication
@@ -146,10 +139,10 @@ public class Controller implements Initializable {
                                 chat.clear();
                                 break;
                             }
-                            if (in.equals(Commands.REGISTRATION_OK)){
+                            if (in.equals(Commands.REGISTRATION_OK)) {
                                 regController.regResult(true);
                             }
-                            if (in.equals(Commands.REGISTRATION_FAILED)){
+                            if (in.equals(Commands.REGISTRATION_FAILED)) {
                                 regController.regResult(false);
                             }
                         } else {
@@ -162,13 +155,13 @@ public class Controller implements Initializable {
                     while (true) {
                         String in = input.readUTF();
 
-                        if (in.startsWith("/")){
+                        if (in.startsWith("/")) {
                             if (in.equalsIgnoreCase(Commands.END)) {
                                 throw new RuntimeException("Disconnected by server");
                             }
-                            if (in.startsWith(Commands.CLIENT_LIST)){
-                                String [] tokens = in.split("\\s");
-                                Platform.runLater(()->{
+                            if (in.startsWith(Commands.CLIENT_LIST)) {
+                                String[] tokens = in.split("\\s");
+                                Platform.runLater(() -> {
                                     clientList.getItems().clear();
                                     for (int i = 1; i < tokens.length; i++) {
                                         clientList.getItems().add(tokens[i]);
@@ -179,7 +172,7 @@ public class Controller implements Initializable {
                             chat.appendText(in + "\n");
                         }
                     }
-                } catch (RuntimeException e){
+                } catch (RuntimeException e) {
                     System.out.println(e.getMessage());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -198,7 +191,7 @@ public class Controller implements Initializable {
         }
     }
 
-    public void setIsAuth(boolean isAuth){
+    public void setIsAuth(boolean isAuth) {
         this.isAuth = isAuth;
         messagePanel.setVisible(isAuth);
         messagePanel.setManaged(isAuth);
@@ -207,7 +200,7 @@ public class Controller implements Initializable {
         clientList.setVisible(isAuth);
         clientList.setManaged(isAuth);
 
-        if(!isAuth){
+        if (!isAuth) {
             nick = "";
         }
 
@@ -216,9 +209,9 @@ public class Controller implements Initializable {
         message.clear();
     }
 
-    private void setTitle(String title){
-        Platform.runLater(() ->{
-            if (title.equals("")){
+    private void setTitle(String title) {
+        Platform.runLater(() -> {
+            if (title.equals("")) {
                 stage.setTitle(chatTitle);
             } else {
                 stage.setTitle(String.format("%s [%s]", chatTitle, title));
@@ -230,20 +223,20 @@ public class Controller implements Initializable {
     public void clientListPressed(MouseEvent mouseEvent) {
         String text = message.getText();
         String user = clientList.getSelectionModel().getSelectedItems().toString();
-        user = user.substring(1, user.length()-1);
+        user = user.substring(1, user.length() - 1);
         String messageToUser = String.format("%s %s %s", Commands.WHISPER, user, text);
         message.clear();
         message.setText(messageToUser);
     }
 
     public void wantToReg(ActionEvent actionEvent) {
-        if(regStage == null){
+        if (regStage == null) {
             createRegWindow();
         }
         regStage.show();
     }
 
-    private void createRegWindow(){
+    private void createRegWindow() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/reg.fxml"));
             Parent root = fxmlLoader.load();
@@ -261,9 +254,9 @@ public class Controller implements Initializable {
         }
     }
 
-    public void tryToReg(String login, String password, String nickname){
+    public void tryToReg(String login, String password, String nickname) {
         String message = String.format("%s %s %s %s", Commands.REGISTRATION, login, password, nickname);
-        if (socket == null || socket.isClosed()){
+        if (socket == null || socket.isClosed()) {
             connect();
         }
         try {
